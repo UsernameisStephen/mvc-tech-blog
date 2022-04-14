@@ -1,21 +1,22 @@
 const router = require('express').Router();
-const { Tag, Product, ProductTag } = require('../../models');
+const { Post } = require('../../models/');
+const withAuth = require('../../utils/auth');
+const sequelize = require('../../config/connection');
+// GET api/posts/ -- get all posts
+router.post('/', withAuth, async (req, res) => {
+    const body = req.body;
+  
+    try {
+      const newPost = await Post.create({ ...body, userId: req.session.userId });
+      res.json(newPost);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  });
 
-// The `/api/tags` endpoint
+// GET api/posts/:id -- get a single post by id
 
-router.get('/', async (req, res) => {
-  // find all tags
-  // be sure to include its associated Product data
-  try {
-    const getTags = await Tag.findAll({
-      include: [Product]
-    });
-    res.status(200).json(getTags);
-  } catch (err) {
-    res.status(500).json(err);
-  }
 
-});
 
 router.get('/:id', async (req, res) => {
   // find a single tag by its `id`
@@ -32,6 +33,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// POST api/posts -- create a new post
+
 router.post('/', async (req, res) => {
   // create a new tag
   try {
@@ -43,6 +46,8 @@ router.post('/', async (req, res) => {
     res.status(400).json(err);
   }
 });
+
+// PUT api/posts/1-- update a post's title or text
 
 router.put('/:id', async (req, res) => {
   // update a tag's name by its `id` value
@@ -58,6 +63,8 @@ router.put('/:id', async (req, res) => {
     res.status(400).json(err);
   }
 });
+
+// DELETE api/posts/1 -- delete a post
 
 router.delete('/:id', async (req, res) => {
   // delete on tag by its `id` value
